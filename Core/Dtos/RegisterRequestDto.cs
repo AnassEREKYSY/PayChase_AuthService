@@ -1,2 +1,2 @@
 namespace Core.Dtos;
-public record RegisterRequest(string Email, string Password, string? FullName);
+public record RegisterRequest(string OrgId, string Email, string Password, string Name);

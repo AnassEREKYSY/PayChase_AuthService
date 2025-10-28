@@ -12,18 +12,13 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public class AuthController(AuthService _svc, IUserRepository _users) : ControllerBase
 {
-
     [HttpPost("register")]
-    public async Task<ActionResult<TokenResponse>> Register(RegisterRequest req, CancellationToken ct) =>
+    public async Task<ActionResult<MeResponse>> Register(RegisterRequest req, CancellationToken ct) =>
         Ok(await _svc.RegisterAsync(req, ct));
 
     [HttpPost("login")]
     public async Task<ActionResult<TokenResponse>> Login(LoginRequest req, CancellationToken ct) =>
         Ok(await _svc.LoginAsync(req, ct));
-
-    [HttpPost("refresh")]
-    public async Task<ActionResult<TokenResponse>> Refresh(RefreshRequest req, CancellationToken ct) =>
-        Ok(await _svc.RefreshAsync(req, ct));
 
     [Authorize]
     [HttpGet("me")]
@@ -33,6 +28,9 @@ public class AuthController(AuthService _svc, IUserRepository _users) : Controll
         if (string.IsNullOrEmpty(sub)) return Unauthorized();
         var u = await _users.GetByIdAsync(sub, ct);
         if (u is null) return NotFound();
-        return Ok(new MeResponse(u.Id, u.Email, u.FullName, u.CreatedAt));
+
+        return Ok(new MeResponse(
+            u.Id, u.OrgId, u.Email, u.Name,
+            u.Roles.ToArray(), u.Status.ToString(), u.CreatedAt));
     }
 }

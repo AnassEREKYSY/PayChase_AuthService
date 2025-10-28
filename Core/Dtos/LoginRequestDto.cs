@@ -1,2 +1,2 @@
 namespace Core.Dtos;
-public record LoginRequest(string Email, string Password);
+public record LoginRequest(string OrgId, string Email, string Password);

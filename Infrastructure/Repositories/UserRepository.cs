@@ -8,13 +8,16 @@ namespace Infrastructure.Repositories;
 public class UserRepository : IUserRepository
 {
     private readonly IMongoCollection<User> _col;
-    public UserRepository(IMongoDatabase db) => _col = db.GetCollection<User>("users");
+    public UserRepository(IMongoDatabase db)
+    {
+        _col = db.GetCollection<User>("auth.users");
+    }
 
-    public async Task<User?> GetByEmailAsync(string email, CancellationToken ct) =>
-        await _col.Find(x => x.Email == email).FirstOrDefaultAsync(ct);
+    public Task<User?> GetByEmailAsync(string orgId, string email, CancellationToken ct) =>
+        _col.Find(x => x.OrgId == orgId && x.Email == email).FirstOrDefaultAsync(ct);
 
-    public async Task<User?> GetByIdAsync(string id, CancellationToken ct) =>
-        await _col.Find(x => x.Id == id).FirstOrDefaultAsync(ct);
+    public Task<User?> GetByIdAsync(string id, CancellationToken ct) =>
+        _col.Find(x => x.Id == id).FirstOrDefaultAsync(ct);
 
     public async Task<string> CreateAsync(User user, CancellationToken ct)
     {

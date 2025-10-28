@@ -31,9 +31,11 @@ public class JwtProvider : IJwtProvider
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id),
+            new("orgId", user.OrgId),
             new(JwtRegisteredClaimNames.Email, user.Email),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+        foreach (var r in user.Roles) claims.Add(new Claim(ClaimTypes.Role, r));
 
         var jwt = new JwtSecurityToken(
             issuer: _issuer,
@@ -43,7 +45,6 @@ public class JwtProvider : IJwtProvider
             expires: expires,
             signingCredentials: creds
         );
-
         return (new JwtSecurityTokenHandler().WriteToken(jwt), expires);
     }
 

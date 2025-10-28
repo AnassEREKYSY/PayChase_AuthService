@@ -6,51 +6,44 @@ using Infrastructure.ISecurity;
 
 namespace Infrastructure.Services;
 
-public class AuthService
+public class AuthService(IUserRepository _users, IRefreshTokenRepository _refresh, IJwtProvider _jwt)
 {
-    private readonly IUserRepository _users;
-    private readonly IRefreshTokenRepository _refresh;
-    private readonly IJwtProvider _jwt;
 
-    public AuthService(IUserRepository users, IRefreshTokenRepository refresh, IJwtProvider jwt)
+    public async Task<MeResponse> RegisterAsync(RegisterRequest req, CancellationToken ct)
     {
-        _users = users; _refresh = refresh; _jwt = jwt;
-    }
-
-    public async Task<TokenResponse> RegisterAsync(RegisterRequest req, CancellationToken ct)
-    {
-        var existing = await _users.GetByEmailAsync(req.Email.ToLowerInvariant(), ct);
-        if (existing is not null) throw new InvalidOperationException("Email already registered.");
+        var email = req.Email.Trim().ToLowerInvariant();
+        var existing = await _users.GetByEmailAsync(req.OrgId, email, ct);
+        if (existing is not null) throw new InvalidOperationException("Email already registered for this org.");
 
         var user = new User
         {
             Id = Guid.NewGuid().ToString("N"),
-            Email = req.Email.ToLowerInvariant(),
+            OrgId = req.OrgId,
+            Email = email,
+            Name = req.Name?.Trim() ?? email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
-            FullName = req.FullName
+            Roles = new() { "user" },
+            Status = UserStatus.active,
+            CreatedAt = DateTime.UtcNow
         };
 
         await _users.CreateAsync(user, ct);
-        return await IssueTokensAsync(user, ct);
+
+        return new MeResponse(
+            user.Id, user.OrgId, user.Email, user.Name,
+            user.Roles.ToArray(), user.Status.ToString(), user.CreatedAt);
     }
 
     public async Task<TokenResponse> LoginAsync(LoginRequest req, CancellationToken ct)
     {
-        var user = await _users.GetByEmailAsync(req.Email.ToLowerInvariant(), ct)
+        var email = req.Email.Trim().ToLowerInvariant();
+        var user = await _users.GetByEmailAsync(req.OrgId, email, ct)
                    ?? throw new UnauthorizedAccessException("Invalid credentials.");
         if (!BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Invalid credentials.");
+        if (user.Status == UserStatus.disabled)
+            throw new UnauthorizedAccessException("Account disabled.");
 
-        return await IssueTokensAsync(user, ct);
-    }
-
-    public async Task<TokenResponse> RefreshAsync(RefreshRequest req, CancellationToken ct)
-    {
-        var rt = await _refresh.GetAsync(req.RefreshToken, ct) ?? throw new UnauthorizedAccessException("Invalid refresh token.");
-        if (rt.ExpiresAt <= DateTime.UtcNow || rt.Revoked) throw new UnauthorizedAccessException("Refresh token expired.");
-
-        var user = await _users.GetByIdAsync(rt.UserId, ct) ?? throw new UnauthorizedAccessException("User not found.");
-        await _refresh.RevokeAsync(rt.Token, ct); // rotate
         return await IssueTokensAsync(user, ct);
     }
 
