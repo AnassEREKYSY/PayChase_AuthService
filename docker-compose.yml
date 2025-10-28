@@ -1,0 +1,37 @@
+services:
+  paychase-auth:
+    build: .
+    image: paychase/auth:dev
+    env_file: .env
+    depends_on:
+      - paychase-mongo
+      - paychase-redis
+    networks:
+      - paychase-net
+    ports:
+      - "8081:8080" # host:container
+
+  paychase-mongo:
+    image: mongo:7
+    container_name: paychase-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpass
+    volumes:
+      - mongo_data:/data/db
+    networks: [paychase-net]
+    ports:
+      - "27017:27017"
+
+  paychase-redis:
+    image: redis:7
+    container_name: paychase-redis
+    networks: [paychase-net]
+    ports:
+      - "6379:6379"
+
+networks:
+  paychase-net:
+
+volumes:
+  mongo_data:
