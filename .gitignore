@@ -1,1 +1,68 @@
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Env / secrets ---
 .env
+.env.*.local
+secrets.json
+**/appsettings.*.local.json
+**/appsettings.Local.json
+
+# --- Dotnet build artifacts ---
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+*.pidb
+*.svclog
+*.user
+*.suo
+*.cache
+*.ide/
+*.nupkg
+*.snupkg
+
+# Assemblies (if anything slips outside bin/obj)
+*.dll
+*.exe
+*.pdb
+*.mdb
+
+# --- Tests / coverage ---
+TestResults/
+.coverage
+coverage/
+*.coverage
+*.coveragexml
+
+# --- Tools ---
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.iml
+
+# --- NuGet ---
+# (packages are restored; keep lock if you use it)
+packages/
+project.lock.json
+artifacts/
+
+# --- Rider / ReSharper ---
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# --- Logs / temps ---
+*.log
+logs/
+temp/
+tmp/
+
+# --- Docker ---
+**/.docker/
+docker-data/
