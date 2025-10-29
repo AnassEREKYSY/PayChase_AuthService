@@ -78,15 +78,45 @@ if (string.IsNullOrWhiteSpace(key)) throw new InvalidOperationException("JWT key
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
     {
+        o.MapInboundClaims = false;
+        o.IncludeErrorDetails = true;
         o.TokenValidationParameters = new TokenValidationParameters
         {
             ValidIssuer = builder.Configuration["JWT_ISSUER"] ?? builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["JWT_AUDIENCE"] ?? builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration["JWT_KEY"] ?? builder.Configuration["Jwt:Key"] ?? string.Empty)),
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
-            ValidateIssuerSigningKey = true
+            ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.FromMinutes(5)
+        };
+
+        o.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var auth = ctx.Request.Headers.Authorization.ToString();
+                Console.WriteLine($"[JWT] /{ctx.Request.Method} {ctx.Request.Path} Authorization header present: {(!string.IsNullOrWhiteSpace(auth)).ToString()}");
+                if (!string.IsNullOrWhiteSpace(auth))
+                    Console.WriteLine($"[JWT] Authorization starts with: {auth.Split(' ').FirstOrDefault()}");
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = ctx =>
+            {
+                Console.WriteLine("[JWT] Auth failed: " + ctx.Exception.GetType().Name + " - " + ctx.Exception.Message);
+                if (ctx.Exception is SecurityTokenInvalidIssuerException || ctx.Exception is SecurityTokenInvalidAudienceException)
+                {
+                    Console.WriteLine($"[JWT] Expected Issuer: {o.TokenValidationParameters.ValidIssuer}, Audience: {o.TokenValidationParameters.ValidAudience}");
+                }
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = ctx =>
+            {
+                Console.WriteLine("[JWT] Token validated OK.");
+                return Task.CompletedTask;
+            }
         };
     });
 

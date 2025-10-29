@@ -12,10 +12,12 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public class AuthController(AuthService _svc, IUserRepository _users) : ControllerBase
 {
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<ActionResult<MeResponse>> Register(RegisterRequest req, CancellationToken ct) =>
         Ok(await _svc.RegisterAsync(req, ct));
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<TokenResponse>> Login(LoginRequest req, CancellationToken ct) =>
         Ok(await _svc.LoginAsync(req, ct));
