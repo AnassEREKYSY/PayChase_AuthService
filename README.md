@@ -18,6 +18,7 @@ JWT-based authentication microservice for **PayChase**.
 
 ## Project Structure
 
+```text
 /API
   ├─ Controllers/
   │   └─ AuthController.cs
@@ -58,7 +59,7 @@ Dockerfile
 docker-compose.yml
 PayChase.Auth.sln
 README.md
-
+```
 
 ## Prerequisites
 
