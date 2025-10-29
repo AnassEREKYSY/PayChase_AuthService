@@ -14,6 +14,19 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var envFile = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())!.FullName, ".env");
+if (File.Exists(envFile))
+{
+    foreach (var line in File.ReadAllLines(envFile))
+    {
+        if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
+        var parts = line.Split('=', 2, StringSplitOptions.TrimEntries);
+        if (parts.Length == 2)
+            Environment.SetEnvironmentVariable(parts[0], parts[1]);
+    }
+}
+builder.Configuration.AddEnvironmentVariables();
+
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.AllowAnyHeader().AllowAnyMethod().AllowCredentials().SetIsOriginAllowed(_ => true)));
 
