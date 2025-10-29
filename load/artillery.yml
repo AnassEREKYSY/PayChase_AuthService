@@ -1,0 +1,29 @@
+config:
+  target: "http://127.0.0.1:5261"
+  phases:
+    - name: smoke
+      duration: 5
+      arrivalRate: 1
+  http:
+    timeout: 10
+    pool: 50
+    discardResponseBodies: false
+
+scenarios:
+  - name: login->me
+    flow:
+      - post:
+          url: "/api/Auth/login"
+          json:
+            orgId: "org-1"
+            email: "anass@anass.com"
+            password: "P@ssw0rd"
+          capture:
+            - json: "$.accessToken"
+              as: "accessToken"
+      - get:
+          url: "/api/Auth/me"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          expect:
+            - statusCode: 200
