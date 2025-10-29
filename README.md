@@ -19,48 +19,46 @@ JWT-based authentication microservice for **PayChase**.
 ## Project Structure
 
 /API
-├── Controllers
-│ └── AuthController.cs
-├── Program.cs
-├── appsettings.json
-└── (other Web API configuration files)
+  ├─ Controllers/
+  │   └─ AuthController.cs
+  ├─ Program.cs
+  └─ appsettings.json
 
 /Core
-├── Dtos
-│ ├── LoginRequest.cs
-│ ├── RegisterRequest.cs
-│ └── ...
-├── Entities
-│ ├── User.cs
-│ └── RefreshToken.cs
-└── Responses
-│ ├── MeResponse.cs
-│ └── TokenResponse.cs
+  ├─ Dtos/
+  │   ├─ LoginRequest.cs
+  │   └─ RegisterRequest.cs
+  ├─ Entities/
+  │   ├─ User.cs
+  │   └─ RefreshToken.cs
+  └─ Responses/
+      ├─ MeResponse.cs
+      └─ TokenResponse.cs
 
 /Infrastructure
-├── Security
-│ ├── JwtProvider.cs
-│ └── RedisTokenBlacklist.cs
-├── Repositories
-│ ├── UserRepository.cs
-│ └── RefreshTokenRepository.cs
-├── Services
-│ └── AuthService.cs
-├── ISecurity
-│ └── IJwtProvider.cs
-└── IRepositories
-├── └── IUserRepository.cs
-├── └── IRefreshTokenRepository.cs
-└── └── IOrgRepository.cs
+  ├─ ISecurity/
+  │   └─ IJwtProvider.cs
+  ├─ IRepositories/
+  │   ├─ IUserRepository.cs
+  │   ├─ IRefreshTokenRepository.cs
+  │   └─ IOrgRepository.cs
+  ├─ Security/
+  │   ├─ JwtProvider.cs
+  │   └─ RedisTokenBlacklist.cs
+  ├─ Repositories/
+  │   ├─ UserRepository.cs
+  │   └─ RefreshTokenRepository.cs
+  └─ Services/
+      └─ AuthService.cs
 
 /load
-├── artillery.yml
-└── (load test reports and outputs)
+  └─ artillery.yml
 
 Dockerfile
 docker-compose.yml
 PayChase.Auth.sln
 README.md
+
 
 ## Prerequisites
 
