@@ -1,15 +1,18 @@
-# build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ./src ./src
-COPY ./tests ./tests
-RUN dotnet restore src/PayChase.Auth.API/PayChase.Auth.API.csproj
-RUN dotnet publish src/PayChase.Auth.API/PayChase.Auth.API.csproj -c Release -o /app/publish
 
-# run
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+COPY ["API/API.csproj", "API/"]
+COPY ["Core/Core.csproj", "Core/"]
+COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
+RUN dotnet restore "API/API.csproj"
+
+COPY . .
+WORKDIR /src/API
+RUN dotnet publish "API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-# dotnet uses ASPNETCORE_URLS from env
-EXPOSE 8080
-ENTRYPOINT ["dotnet", "PayChase.Auth.API.dll"]
+ENV ASPNETCORE_URLS=http://+:5261
+EXPOSE 5261
+ENTRYPOINT ["dotnet", "API.dll"]

@@ -1,37 +1,16 @@
+version: "3.9"
+
 services:
-  paychase-auth:
-    build: .
-    image: paychase/auth:dev
+  auth-service:
+    image: ghcr.io/${OWNER_LC}/paychase-auth:latest
+    container_name: paychase-auth
+    restart: unless-stopped
     env_file: .env
-    depends_on:
-      - paychase-mongo
-      - paychase-redis
+    ports:
+      - "5261:5261"
     networks:
-      - paychase-net
-    ports:
-      - "8081:8080" # host:container
-
-  paychase-mongo:
-    image: mongo:7
-    container_name: paychase-mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpass
-    volumes:
-      - mongo_data:/data/db
-    networks: [paychase-net]
-    ports:
-      - "27017:27017"
-
-  paychase-redis:
-    image: redis:7
-    container_name: paychase-redis
-    networks: [paychase-net]
-    ports:
-      - "6379:6379"
+      - paychase_net
 
 networks:
-  paychase-net:
-
-volumes:
-  mongo_data:
+  paychase_net:
+    external: true
