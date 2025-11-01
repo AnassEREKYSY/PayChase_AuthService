@@ -10,6 +10,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+
 public class AuthController(AuthService _svc, IUserRepository _users) : ControllerBase
 {
     [AllowAnonymous]
