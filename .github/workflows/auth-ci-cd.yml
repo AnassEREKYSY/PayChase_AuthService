@@ -147,3 +147,5 @@ jobs:
             docker compose down --remove-orphans || true
             docker compose pull
             docker compose up -d
+
+
